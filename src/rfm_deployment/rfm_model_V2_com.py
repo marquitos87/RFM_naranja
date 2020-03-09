@@ -222,44 +222,48 @@ def migraciones(fecha_in_1, fecha_in_2, fecha_out_1, fecha_out_2, label):
     df2 = pd.read_csv(f'{label}-rfm-segmentos-{fecha_in_2}--{fecha_out_2}.csv')
     fecha_in_1 = str(fecha_in_1)
     fecha_in_2 = str(fecha_in_2)
+    fecha_out_1 = str(fecha_out_1)
+    fecha_out_2 = str(fecha_out_2)
 
     df1_a = df1[['CUIT','Segment']]
-    df1_a = df1_a.rename(columns={'Segment':f'Segment_{int(fecha_in_1[0:4])}'})
+    df1_a = df1_a.rename(columns={'Segment':f'{fecha_out_1[4:6]}-{fecha_in_1[4:6]}/{fecha_in_1[0:4]}'})
 
     df2_a = df2[['CUIT','Segment']]
-    df2_a = df2_a.rename(columns={'Segment':f'Segment_{int(fecha_in_2[0:4])}'})
+    df2_a = df2_a.rename(columns={'Segment':f'{fecha_out_2[4:6]}-{fecha_in_2[4:6]}/{fecha_in_2[0:4]}'})
 
-    mergeddf = df1_a.merge(df2_a, on = 'CUIT')
+    mergeddf = df1_a.merge(df2_a, on = 'CUIT',  how = 'outer')
 
-    parse_1 = f'Segment_{int(fecha_in_1[0:4])}'
-    parse_2 = f'Segment_{int(fecha_in_2[0:4])}'
-    
-    comparedf=pd.concat([mergeddf['parse_1'].value_counts(normalize=True),
-                         mergeddf['parse_2'].value_counts(normalize=True)],axis=1, sort=False)
-    comparedf = comparedf.reset_index()
-    a = comparedf[['index', f'Segment_{int(fecha_in_1[0:4])}']]
-    a['year'] = int(fecha_in_1[0:4]) 
-    b = comparedf[['index', f'Segment_{int(fecha_in_2[0:4])}']]
-    b['year'] = int(fecha_in_2[0:4])
-    a = a.rename(columns = {'index':'index', f'Segment_{int(fecha_in_1[0:4])}':'propor'})
-    b = b.rename(columns={'index':'index', f'Segment_{int(fecha_in_2[0:4])}':'propor'})
+    parse_1 = f'{fecha_out_1[4:6]}-{fecha_in_1[4:6]}/{fecha_in_1[0:4]}'
+    parse_2 = f'{fecha_out_2[4:6]}-{fecha_in_2[4:6]}/{fecha_in_2[0:4]}'
+
+    comparedf=pd.concat([mergeddf[f'{parse_1}'].value_counts(normalize=True),
+	             mergeddf[f'{parse_2}'].value_counts(normalize=True)],axis=1, sort=False)
+    comparedf = comparedf.fillna(0).reset_index()
+
+    a = comparedf[['index', parse_1]]
+    a['trimestres'] = parse_1
+    b = comparedf[['index', parse_2]]
+    b['trimestres'] = parse_2
+    a = a.rename(columns = {'index':'index', parse_1:'propor'})
+    b = b.rename(columns={'index':'index', parse_2:'propor'})
     c = pd.concat([a,b])
-    
+
     fig, ax = plt.subplots(figsize=(13,8))
     fig.suptitle('Distribución de comercios segun segmentos y trimestre', fontsize=25)
-    sns.barplot(x = 'index', y = 'propor', hue = 'year',  data=c)
+    sns.barplot(x = 'index', y = 'propor', hue = 'trimestres',  data=c)
     ax.set_xlabel('')
     ax.set_ylabel('Comercios (%)')
     plt.xticks(rotation=30, ha='center')
     plt.show()
     
     print('--------------------------------------------------------------------------------------------------------')
-    print('Porcentaje de migración de comercios entre segmentos comparando el mismo trimestre en años consecutivos..')
-    sumdf=pd.pivot_table(data=mergeddf.set_index('DNI'),
-                          index=f'Segment_{int(fecha_in_2[0:4])}',columns=f'Segment_{int(fecha_in_1[0:4])}',
-                          aggfunc='size').apply(lambda x: (x/sum(x))*100,axis=1)
+    print(f'Porcentaje de migración de comercios entre los trimestres {parse_1} y {parse_2}...')
+    sumdf=pd.pivot_table(data=mergeddf.set_index('CUIT'),
+                      index=parse_1,columns=parse_2,
+                      aggfunc='size').fillna(0).apply(lambda x: (x/sum(x))*100,axis=1)
 
-    sumdf['Total'] = sumdf.apply(lambda x: sum(x),axis=1)
+    sumdf['Total'] = sumdf.fillna(0).apply(lambda x: sum(x), axis=1)
+
     sumdf.to_csv(f'migracion-{fecha_in_1}-{fecha_out_1}--{fecha_in_2}-{fecha_out_2}.csv', index = False)
     
     return sumdf
