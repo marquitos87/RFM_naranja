@@ -285,7 +285,7 @@ def evolucion_trimestral_segmentos(df_lineas):
     plt.plot('Trimestre', 'Cercanos a Hibernar', data = df_lineas, marker = 'o', markerfacecolor = 'magenta', markersize = 6, color = 'magenta', linewidth = 1 )
     plt.plot('Trimestre', 'Hibernando', data = df_lineas, marker = 'o', markerfacecolor = 'pink', markersize = 6, color = 'pink', linewidth = 1 )
     plt.legend(loc = 'upper right', prop ={'size': 12})
-    plt.xticks(ha='right',rotation=45)
+    plt.xticks(ha='right',rotation=30)
     plt.xlabel('Trimestre')
     plt.ylabel('% poblacion')
     plt.savefig('lineas_tiempo.pdf')

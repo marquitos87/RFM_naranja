@@ -3,8 +3,6 @@ import numpy as np
 import calendar
 import datetime
 
-
-
 def preprocesamiento(rfm):
     
     df = rfm[rfm.ANTIGUEDAD >= 6]
@@ -100,4 +98,22 @@ def label_segmentos(rfm):
 
     rfm.to_csv(f'RFM-segmentos.csv', index = False)
 
+print('Lectura de datos...')
+rfm = pd.read_csv('RFM.csv')
+print('-------------------------------------------------------------------------------------------------')
 
+print('Preprocesamiento...')
+rfm = preprocesamiento(rfm)
+
+print('-------------------------------------------------------------------------------------------------')
+
+#Modelo RFM...
+print('Scoring RFM...')
+rfm = rfm_scoring(rfm)
+print('-------------------------------------------------------------------------------------------------')
+
+#Segmentos...
+print('Procediendo a Segmentar...')
+print('-------------------------------------------------------------------------------------------------')
+label_segmentos(rfm)
+print('Fin...')
