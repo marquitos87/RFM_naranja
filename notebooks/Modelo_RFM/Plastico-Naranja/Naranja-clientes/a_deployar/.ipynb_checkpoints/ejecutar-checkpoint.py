@@ -99,7 +99,7 @@ def label_segmentos(rfm):
     rfm.to_csv(f'RFM-segmentos.csv', index = False)
 
 print('Lectura de datos...')
-rfm = pd.read_csv('RFM.csv')
+rfm = pd.read_csv('RFM_05-2020--02-2020.csv')
 print('-------------------------------------------------------------------------------------------------')
 
 print('Preprocesamiento...')

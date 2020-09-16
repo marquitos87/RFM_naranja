@@ -90,7 +90,7 @@ inner join
 
                    """and (a.ATR_ESTADO_CUENTA_LISTIN = 'RE Recuperable (Amarilla)' or a.ATR_ESTADO_CUENTA_LISTIN IS NULL)
 
-                   and (a.DIM_RUBROS <> 69 and a.DIM_RUBROS <> 27 and a.DIM_RUBROS <> 115 and a.DIM_RUBROS <> -1)
+                   and a.DIM_RUBROS NOT IN (69, 27, 115, -1)
 
                    and a.ATR_DEBITO <> 'S') c
 
@@ -109,8 +109,6 @@ f"b.fecha_ingreso apertura, round(months_between(to_date('{fecha_init_month}', '
          INNER JOIN DW.dim_CLIENTES b ON b.DIMENSION_KEY = a.DIM_CLIENTES
 
          WHERE b.FECHA_BAJA = TO_DATE('00010101000000','YYYYMMDDHH24MISS')
-
-         AND (a.ATR_ESTADO_CUENTA_LISTIN NOT IN ('PV Inconsistencia','CB Código blanco','SB Inconsistencia','CI Cuenta inhabilitada') OR a.ATR_ESTADO_CUENTA_LISTIN IS NULL)
 
          AND a.ATR_ESTADO_APERTURA = '096 - APROBACION' """
 
@@ -139,3 +137,9 @@ def consulta_DW(query, cur):
 
 #=========================================================================================================================
 
+con = cx_Oracle.connect('MMONTERO_DIS/password@//cluster-dwhAIX-scan:1521/dwh_app_service', encoding = 'utf8')
+cur = con.cursor() #creo un cursor
+cur.execute(query)
+res = cur.fetchall()
+columns = [c[0] for c in cur.description]
+data = pd.DataFrame( data = res , columns=columns)

@@ -96,10 +96,10 @@ def label_segmentos(rfm):
     rfm['Segmento'] = rfm['Segmento'].replace(segt_map, regex=True)
     rfm = rfm[['DNI', 'RFMScore', 'Segmento']]
 
-    rfm.to_csv(f'RFM-segmentos.csv', index = False)
+    rfm.to_csv(f'RFM-output.csv', index = False)
 
 print('Lectura de datos...')
-rfm = pd.read_csv('RFM.csv')
+rfm = pd.read_csv('RFM_06-2020--04-2020.csv')
 print('-------------------------------------------------------------------------------------------------')
 
 print('Preprocesamiento...')
@@ -117,3 +117,9 @@ print('Procediendo a Segmentar...')
 print('-------------------------------------------------------------------------------------------------')
 label_segmentos(rfm)
 print('Fin...')
+
+
+
+
+
+
